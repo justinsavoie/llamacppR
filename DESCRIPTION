@@ -1,0 +1,18 @@
+Package: llamacppR
+Type: Package
+Title: Minimal R bindings for llama.cpp (CPU)
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Justin", family = "Savoie", role = c("aut", "cre"), email = "justin@example.com"))
+Description: Lightweight R wrapper for llama.cpp's simple example using only CPU.
+    Vendors the llama.cpp source and builds a static library via CMake during
+    package compilation. Provides a single function to generate text from a prompt.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+SystemRequirements: CMake (>= 3.20), C++17 toolchain
+NeedsCompilation: yes
+Depends: R (>= 3.6)
+Suggests: 
+URL: https://github.com/justinsavoie/llamacppR
+BugReports: https://github.com/justinsavoie/llamacppR/issues

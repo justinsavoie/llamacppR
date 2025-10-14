@@ -1,0 +1,6 @@
+^\.github$
+^\.git$
+^llama\.cpp$
+^src/third_party/llama\.cpp/build$
+^README\.md$
+^LICENSE$

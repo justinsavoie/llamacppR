@@ -1,0 +1,11 @@
+.DS_Store
+src/third_party/llama.cpp/build/
+src/*.so
+src/*.dll
+src/*.dylib
+src/*.o
+src/*.a
+*.Rproj.user
+*.Rhistory
+*.RData
+*.Ruserdata

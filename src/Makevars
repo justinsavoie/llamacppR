@@ -1,0 +1,42 @@
+# Ensure C++17
+CXX_STD = CXX17
+
+LLAMA_DIR      = third_party/llama.cpp
+LLAMA_BUILD    = $(LLAMA_DIR)/build
+LLAMA_LIBDIR   = $(LLAMA_BUILD)/lib
+LLAMA_LIB      = $(LLAMA_LIBDIR)/libllama.a
+GGML_LIB       = $(LLAMA_LIBDIR)/libggml.a
+
+PKG_CPPFLAGS  += -I$(LLAMA_DIR)/include -I$(LLAMA_DIR)/ggml/include
+
+# Link static libs from llama.cpp build and macOS Accelerate for CPU
+# Static link order matters: llama -> ggml -> ggml-cpu -> ggml-base -> ggml-blas
+PKG_LIBS      += $(LLAMA_LIB) \
+                 $(LLAMA_LIBDIR)/libggml.a \
+                 $(LLAMA_LIBDIR)/libggml-cpu.a \
+                 $(LLAMA_LIBDIR)/libggml-base.a \
+                 $(LLAMA_LIBDIR)/libggml-blas.a \
+                 -framework Accelerate -lpthread
+
+all: $(LLAMA_LIB) $(SHLIB)
+
+
+$(LLAMA_LIB):
+	@echo "Configuring llama.cpp (CPU-only) via CMake..."
+	@cmake -S $(LLAMA_DIR) -B $(LLAMA_BUILD) \
+	  -DCMAKE_BUILD_TYPE=Release \
+	  -DBUILD_SHARED_LIBS=OFF \
+	  -DLLAMA_BUILD_TESTS=OFF \
+	  -DLLAMA_BUILD_EXAMPLES=OFF \
+	  -DLLAMA_BUILD_SERVER=OFF \
+	  -DLLAMA_METAL=OFF \
+	  -DLLAMA_CUDA=OFF \
+	  -DGGML_METAL=OFF \
+	  -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=$(abspath $(LLAMA_LIBDIR)) \
+	  -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$(abspath $(LLAMA_LIBDIR))
+	@echo "Building libllama (and ggml) ..."
+	@cmake --build $(LLAMA_BUILD) --config Release --target llama -j
+
+.PHONY: clean
+clean:
+	@rm -f *.o *.so *.a *.dll *.dylib
