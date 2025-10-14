@@ -24,9 +24,6 @@ jobs:
         with:
           r-version: '4.2.2'
 
-      - name: Setup RTools (for R 4.2.x)
-        uses: r-lib/actions/setup-rtools@v2
-
       - name: Confirm toolchain
         shell: bash
         run: |
