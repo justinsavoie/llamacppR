@@ -3,13 +3,18 @@ CXX_STD = CXX17
 LLAMA_DIR    = third_party/llama.cpp
 LLAMA_BUILD  = $(LLAMA_DIR)/build
 LLAMA_LIBDIR = $(LLAMA_BUILD)/lib
-LLAMA_LIB    = $(LLAMA_LIBDIR)/libllama.a   # target built by CMake
+LLAMA_LIB    = $(LLAMA_LIBDIR)/libllama.a
 
 # headers
 PKG_CPPFLAGS += -I$(LLAMA_DIR)/include -I$(LLAMA_DIR)/ggml/include
 
-# correct link order: ggml FIRST, then llama (because llama depends on ggml)
-PKG_LIBS += -L$(LLAMA_LIBDIR) -l:ggml.a -lllama -lwinmm -lws2_32 -fopenmp
+# link order is critical: ggml-base -> ggml-cpu -> ggml -> llama
+PKG_LIBS += -L$(LLAMA_LIBDIR) \
+             -l:ggml-base.a \
+             -l:ggml-cpu.a \
+             -l:ggml.a \
+             -lllama \
+             -lwinmm -lws2_32 -fopenmp
 
 all: $(LLAMA_LIB) $(SHLIB)
 
@@ -25,7 +30,6 @@ $(LLAMA_LIB):
 	  -DLLAMA_METAL=OFF \
 	  -DGGML_METAL=OFF \
 	  -DGGML_BLAS=OFF \
-	  -DLLAMA_STATIC=ON \
 	  -DCMAKE_C_FLAGS="-DWINVER=0x0601 -D_WIN32_WINNT=0x0601" \
 	  -DCMAKE_CXX_FLAGS="-DWINVER=0x0601 -D_WIN32_WINNT=0x0601" \
 	  -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=$(abspath $(LLAMA_LIBDIR)) \
