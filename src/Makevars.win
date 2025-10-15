@@ -18,7 +18,7 @@ PKG_LIBS += \
   $(LLAMA_LIBDIR)/ggml-base.a \
   $(LLAMA_LIBDIR)/ggml-blas.a \
   -static-libgcc -static-libstdc++ \
-  -Wl,-Bstatic -lopenblas -static-libgfortran -static-libquadmath -Wl,-Bdynamic \
+  -Wl,-Bstatic -lopenblas -static-libgfortran -Wl,-Bdynamic \
   -lpthread -lwinmm -lws2_32 -fopenmp
 
 all: $(LLAMA_LIB) $(SHLIB)
