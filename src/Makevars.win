@@ -10,13 +10,16 @@ PKG_CPPFLAGS += -I$(LLAMA_DIR)/include -I$(LLAMA_DIR)/ggml/include
 
 # Correct filenames + correct order (left->right resolution):
 # llama depends on ggml*, so ggml* must be to the RIGHT of libllama.a
+# When BLAS is enabled, include ggml-blas and link OpenBLAS (static) + Fortran runtimes.
 PKG_LIBS += \
   $(LLAMA_LIB) \
   $(LLAMA_LIBDIR)/ggml.a \
   $(LLAMA_LIBDIR)/ggml-cpu.a \
   $(LLAMA_LIBDIR)/ggml-base.a \
+  $(LLAMA_LIBDIR)/ggml-blas.a \
   -static-libgcc -static-libstdc++ \
-  -lwinmm -lws2_32 -fopenmp
+  -Wl,-Bstatic -lopenblas -static-libgfortran -static-libquadmath -Wl,-Bdynamic \
+  -lpthread -lwinmm -lws2_32 -fopenmp
 
 all: $(LLAMA_LIB) $(SHLIB)
 
@@ -30,10 +33,10 @@ $(LLAMA_LIB):
 	  -DLLAMA_BUILD_SERVER=OFF \
 	  -DLLAMA_CUDA=OFF \
 	  -DLLAMA_METAL=OFF \
-	  -DGGML_METAL=OFF \
-	  -DGGML_BLAS=OFF \
-	  -DGGML_STATIC=ON \
-	  -DLLAMA_STATIC=ON \
+    -DGGML_METAL=OFF \
+    -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS \
+    -DGGML_STATIC=ON \
+    -DLLAMA_STATIC=ON \
 	  -DCMAKE_C_FLAGS="-DWINVER=0x0601 -D_WIN32_WINNT=0x0601" \
 	  -DCMAKE_CXX_FLAGS="-DWINVER=0x0601 -D_WIN32_WINNT=0x0601" \
 	  -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=$(abspath $(LLAMA_LIBDIR)) \

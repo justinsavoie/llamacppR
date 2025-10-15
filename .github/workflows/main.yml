@@ -24,6 +24,13 @@ jobs:
       # (optional) pandoc for vignettes / README rendering
       - uses: r-lib/actions/setup-pandoc@v2
 
+      - name: Install OpenBLAS (ucrt64)
+        shell: bash
+        run: |
+          pacman -Sy --noconfirm --needed \
+            mingw-w64-ucrt-x86_64-openblas \
+            mingw-w64-ucrt-x86_64-gcc-fortran
+
       - name: Toolchain info
         shell: bash
         run: |
