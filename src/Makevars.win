@@ -8,8 +8,8 @@ LLAMA_LIB    = $(LLAMA_LIBDIR)/libllama.a   # target built by CMake
 # headers
 PKG_CPPFLAGS += -I$(LLAMA_DIR)/include -I$(LLAMA_DIR)/ggml/include
 
-# link **by logical names**; order matters (llama before ggml)
-PKG_LIBS     += -L$(LLAMA_LIBDIR) -lllama -l:ggml.a -lwinmm -lws2_32 -fopenmp
+# correct link order: ggml FIRST, then llama (because llama depends on ggml)
+PKG_LIBS += -L$(LLAMA_LIBDIR) -l:ggml.a -lllama -lwinmm -lws2_32 -fopenmp
 
 all: $(LLAMA_LIB) $(SHLIB)
 
