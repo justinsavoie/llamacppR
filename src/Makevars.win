@@ -8,13 +8,13 @@ LLAMA_LIB    = $(LLAMA_LIBDIR)/libllama.a
 # headers
 PKG_CPPFLAGS += -I$(LLAMA_DIR)/include -I$(LLAMA_DIR)/ggml/include
 
-# Explicit static libraries in correct dependency order
-# Windows needs direct .a file references and strict link order.
+# Correct filenames + correct order (left->right resolution):
+# llama depends on ggml*, so ggml* must be to the RIGHT of libllama.a
 PKG_LIBS += \
-  $(LLAMA_LIBDIR)/libggml-base.a \
-  $(LLAMA_LIBDIR)/libggml-cpu.a \
-  $(LLAMA_LIBDIR)/libggml.a \
   $(LLAMA_LIB) \
+  $(LLAMA_LIBDIR)/ggml.a \
+  $(LLAMA_LIBDIR)/ggml-cpu.a \
+  $(LLAMA_LIBDIR)/ggml-base.a \
   -static-libgcc -static-libstdc++ \
   -lwinmm -lws2_32 -fopenmp
 
