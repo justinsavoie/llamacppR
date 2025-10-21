@@ -1,3 +1,7 @@
 useDynLib(llamacppR, .registration=TRUE)
 export(llama_simple)
 export(llama_sampled)
+export(llama_load)
+export(llama_unload)
+export(llama_generate)
+export(llama_generate_sampled)

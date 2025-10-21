@@ -59,6 +59,41 @@ Expected behavior:
 - Returns the prompt concatenated with the generated continuation as a single UTF-8 string.
 - Uses greedy decoding (no temperature/top-p/top-k controls exposed).
 
+## Fast Loops (Load Once, Reuse)
+
+For classification or many short prompts on CPU, avoid loading the model for every call. Load once, then reuse a persistent handle:
+
+```r
+library(llamacppR)
+
+# 1) Load once (choose a suitable n_ctx)
+h <- llama_load("C:/models/Llama-3.2-1B-Instruct-Q4_K_M.gguf", n_ctx = 2048L)
+
+# 2) Generate greedily (reuses model/context)
+out1 <- llama_generate(h, "Classify sentiment: great product!", n_predict = 8L)
+
+# 3) With sampling controls
+out2 <- llama_generate_sampled(
+  h,
+  prompt = "Write a short tag: R is nice",
+  n_predict = 16L,
+  temperature = 0.7,
+  top_p = 0.9,
+  top_k = 40L
+)
+
+# 4) Use from a loop of many items
+texts <- c("great product!", "terrible service", "ok experience")
+outs <- vapply(texts, function(x) llama_generate(h, paste0("Classify: ", x), 8L), "", USE.NAMES = FALSE)
+
+# 5) Cleanup (optional; also runs on GC)
+llama_unload(h)
+```
+
+Notes:
+- `llama_load()` loads the GGUF model and creates a context once; subsequent calls reuse it and clear the KV cache per generation.
+- For multi-threaded use, create one handle per thread. Handles are not thread-safe.
+
 ## Models
 
 - The function expects a path to a GGUF model file compatible with the vendored llama.cpp.
@@ -69,6 +104,7 @@ Expected behavior:
 - CPU-only; GPU backends are disabled.
 - No streaming API; generation is returned after completion.
 - Minimal sampling controls (greedy decoding only) in the R interface.
+  - Use the handle API: `llama_generate_sampled()` for temperature/top-p/top-k/penalties.
 
 ## How It Works
 
